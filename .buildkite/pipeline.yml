@@ -1,5 +1,5 @@
 steps:
-  - label: ":golang:"
+  - label: ":golang: build"
     plugins:
       golang-cross-compile#74f9522:
         debug: true
@@ -7,14 +7,14 @@ steps:
         import: github.com/buildkite/cli
         targets:
           - version: 1.10.3
-            os: linux
+            goos: linux
+            goarch: amd64
+          - version: 1.10.3
+            goos: windows
+            goarch: amd64
+          - version: 1.10.3
+            goos: darwin
             arch: amd64
           - version: 1.10.3
-            os: windows
-            arch: amd64
-          - version: 1.10.3
-            os: darwin
-            arch: amd64
-          - version: 1.10.3
-            os: freebsd
-            arch: amd64
+            goos: freebsd
+            goarch: amd64
