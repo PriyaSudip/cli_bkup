@@ -1,7 +1,7 @@
 steps:
   - label: ":golang:"
     plugins:
-      golang-cross-compile#v1.0.0:
+      golang-cross-compile#74f9522:
         build: ./cmd/bk
         import: github.com/buildkite/cli
         targets:
