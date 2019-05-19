@@ -33,6 +33,12 @@ func Branch(dir string) (string, error) {
 // Run a git command against a dir and capture combined output or error
 func gitCommand(dir string, params ...string) (string, error) {
 	gitDir := filepath.Join(dir, ".git")
+
+	// Check the git dir exists
+	if _, err := os.Stat(gitDir); os.IsNotExist(err) {
+		return "", fmt.Errorf("Directory %q isn't a git repository", dir)
+	}
+
 	gitParams := append([]string{"--git-dir", gitDir}, params...)
 
 	cmd := exec.Command("git", gitParams...)

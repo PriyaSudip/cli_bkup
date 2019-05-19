@@ -29,7 +29,7 @@ func BrowseCommand(ctx BrowseCommandContext) error {
 		var gitErr error
 		branch, gitErr = git.Branch(dir)
 		if gitErr != nil {
-			return NewExitError(err, 1)
+			return NewExitError(gitErr, 1)
 		}
 	}
 
