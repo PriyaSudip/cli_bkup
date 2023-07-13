@@ -129,6 +129,9 @@ func run(args []string, exit func(int)) {
 			return cli.BuildCreateCommand(buildCreateCtx)
 		})
 
+	// buildCreateCmd.
+	// 	Flag("generate", "Generate a pipeline template")
+
 	buildCreateCmd.
 		Flag("dir", "Build a specific directory, defaults to the current").
 		ExistingDirVar(&buildCreateCtx.Dir)
@@ -182,6 +185,16 @@ func run(args []string, exit func(int)) {
 	// pipeline commands
 
 	pipelineCmd := app.Command("pipeline", "Operate on pipeline")
+
+	pipelineGenerateCtx := cli.PipelineGenerateCommandContext{}
+
+	pipelineCmd.
+		Command("generate", "Generate a new pipeline template").
+		Action(func(c *kingpin.ParseContext) error {
+			pipelineGenerateCtx.Debug = debug
+			pipelineGenerateCtx.TerminalContext = &cli.Terminal{}
+			return cli.PipelineGenerateCommand(pipelineGenerateCtx)
+		})
 
 	pipelineListCtx := cli.PipelineListCommandContext{}
 	pipelineListCmd := pipelineCmd.
