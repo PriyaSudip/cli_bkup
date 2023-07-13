@@ -32,6 +32,13 @@ func PipelineGenerateCommand(ctx PipelineGenerateCommandContext) error {
 		survey.AskOne(hostingPrompt, &hosting, survey.WithValidator(survey.Required))
 	}
 
+	file := ""
+	prompt := &survey.Input{
+		Message: "Save output to:",
+		Default: ".buildkite/pipeline.yml",
+	}
+	survey.AskOne(prompt, &file)
+
 	// todo: generate pipeline.yml
 
 	return nil
