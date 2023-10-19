@@ -1,7 +1,11 @@
 package cli
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/briandowns/spinner"
 )
 
 type PipelineGenerateCommandContext struct {
