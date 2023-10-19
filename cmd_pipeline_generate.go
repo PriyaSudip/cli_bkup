@@ -36,14 +36,38 @@ func PipelineGenerateCommand(ctx PipelineGenerateCommandContext) error {
 		survey.AskOne(hostingPrompt, &hosting, survey.WithValidator(survey.Required))
 	}
 
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond) // Build our new spinner
+	s.Start()                                                   // Start the spinner
+	time.Sleep(4 * time.Second)                                 // Run for some time to simulate work
+	s.Stop()
+
+	fmt.Print(`
+steps:
+  - label: ":railway_track: Build"
+    command: "bundle install"
+    key: build
+
+  - label: ":traffic_light: Test"
+    command: "bundle exec rspec"
+    key: test
+    depends_on: build
+
+  - label: ":rocket: Deploy"
+    plugins:
+      - rails/aws-codedeploy:
+          application: my-rails-app
+          region: us-west-2
+    depends_on: test
+    if: buildkite.branch == "main"
+
+`)
+
 	file := ""
 	prompt := &survey.Input{
 		Message: "Save output to:",
 		Default: ".buildkite/pipeline.yml",
 	}
 	survey.AskOne(prompt, &file)
-
-	// todo: generate pipeline.yml
 
 	return nil
 }
@@ -63,6 +87,11 @@ func (ctx *PipelineGenerateCommandContext) projectPrompt() (survey.Prompt, error
 func (ctx *PipelineGenerateCommandContext) languagePrompt(project string) (survey.Prompt, error) {
 	// todo: fetch inputs from api.
 
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond) // Build our new spinner
+	s.Start()                                                   // Start the spinner
+	time.Sleep(1 * time.Second)                                 // Run for some time to simulate work
+	s.Stop()
+
 	return &survey.Select{
 		Message: "What language are you using?",
 		Options: []string{
@@ -76,6 +105,11 @@ func (ctx *PipelineGenerateCommandContext) languagePrompt(project string) (surve
 
 func (ctx *PipelineGenerateCommandContext) frameworkPrompt(project string, language string) (survey.Prompt, error) {
 	// todo: fetch inputs from api.
+
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond) // Build our new spinner
+	s.Start()                                                   // Start the spinner
+	time.Sleep(1 * time.Second)                                 // Run for some time to simulate work
+	s.Stop()
 
 	return &survey.Select{
 		Message: "What framework are you using?",
@@ -91,6 +125,11 @@ func (ctx *PipelineGenerateCommandContext) frameworkPrompt(project string, langu
 
 func (ctx *PipelineGenerateCommandContext) hostingPrompt(project string, language string, framework string) (survey.Prompt, error) {
 	// todo: fetch inputs from api.
+
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond) // Build our new spinner
+	s.Start()                                                   // Start the spinner
+	time.Sleep(1 * time.Second)                                 // Run for some time to simulate work
+	s.Stop()
 
 	return &survey.Select{
 		Message: "Where will you be deploying to?",
