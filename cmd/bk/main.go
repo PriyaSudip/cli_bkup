@@ -108,6 +108,19 @@ func run(args []string, exit func(int)) {
 		StringVar(&initCtx.PipelineSlug)
 
 	// --------------------------
+	// generator commands
+
+	migrateCtx := cli.PipelineMigrateCommandContext{}
+
+	app.
+		Command("migrate", "Migrate an existing CI/CD configuration to Buildkite").
+		Action(func(c *kingpin.ParseContext) error {
+			migrateCtx.Debug = debug
+			migrateCtx.TerminalContext = &cli.Terminal{}
+			return cli.PipelineMigrateCommand(migrateCtx)
+		})
+
+	// --------------------------
 	// build commands
 
 	buildCmd := app.Command("build", "Operate on builds")
