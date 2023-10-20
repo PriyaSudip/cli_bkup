@@ -43,17 +43,11 @@ func PipelineMigrateCommand(ctx PipelineMigrateCommandContext) error {
 	}
 	survey.AskOne(outputPrompt, &output)
 
-	// TODO: insert amazing buildkite spinner here.
-	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
-	s.Start()
-	defer s.Stop()
-
 	pipeline, err := ctx.transform(input, output)
 	if err != nil {
 		return err
 	}
 
-	s.Stop()
 	ctx.Println(color.GreenString("✅ %s", pipeline.Name()))
 
 	build := false
@@ -74,6 +68,11 @@ func PipelineMigrateCommand(ctx PipelineMigrateCommandContext) error {
 }
 
 func (ctx *PipelineMigrateCommandContext) transform(input, output string) (*os.File, error) {
+	// TODO: insert amazing buildkite spinner here.
+	s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+	s.Start()
+	defer s.Stop()
+
 	file, err := os.Open(input)
 	if err != nil {
 		return nil, err
@@ -112,7 +111,10 @@ func (ctx *PipelineMigrateCommandContext) transform(input, output string) (*os.F
 		return nil, err
 	}
 	resp.Body.Close()
-	fmt.Println(resBody)
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("%s", resBody)
+	}
 
 	err = os.WriteFile(output, resBody.Bytes(), 0644)
 	if err != nil {
