@@ -116,6 +116,13 @@ func (ctx *PipelineMigrateCommandContext) transform(input, output string) (*os.F
 		return nil, fmt.Errorf("%s", resBody)
 	}
 
+	// Create the output directory if it doesn't exist (eg .buildkite)
+	if _, err := os.Stat(output); os.IsNotExist(err) {
+		dir, _ := filepath.Split(output)
+		os.MkdirAll(dir, 0700)
+	}
+
+	// Write the output file (eg. .buildkite/pipeline.yml)
 	err = os.WriteFile(output, resBody.Bytes(), 0644)
 	if err != nil {
 		return nil, err
