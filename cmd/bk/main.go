@@ -110,7 +110,9 @@ func run(args []string, exit func(int)) {
 	// --------------------------
 	// generator commands
 
-	migrateCtx := cli.PipelineMigrateCommandContext{}
+	migrateCtx := cli.PipelineMigrateCommandContext{
+		MigrateAPIEndpoint: "http://localhost:9292",
+	}
 
 	app.
 		Command("migrate", "Migrate an existing CI/CD configuration to Buildkite").

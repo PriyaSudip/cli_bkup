@@ -1,7 +1,13 @@
 package cli
 
 import (
+	"bytes"
+	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -9,14 +15,16 @@ import (
 	"github.com/fatih/color"
 )
 
-const (
-	CircleCI      string = "CircleCI"
-	GitHubActions        = "GitHub Actions"
-)
+var providers map[string]string = map[string]string{
+	"CircleCI":       "circleci.yml",
+	"GitHub Actions": "github.yml",
+}
 
 type PipelineMigrateCommandContext struct {
 	TerminalContext
 	ConfigContext
+
+	MigrateAPIEndpoint string
 
 	Debug bool
 }
@@ -44,8 +52,8 @@ func PipelineMigrateCommand(ctx PipelineMigrateCommandContext) error {
 	if err != nil {
 		return err
 	}
-	s.Stop()
 
+	s.Stop()
 	ctx.Println(color.GreenString("✅ %s", pipeline.Name()))
 
 	build := false
@@ -66,34 +74,70 @@ func PipelineMigrateCommand(ctx PipelineMigrateCommandContext) error {
 }
 
 func (ctx *PipelineMigrateCommandContext) transform(input, output string) (*os.File, error) {
-	// FIXME: faking something happening...
-	time.Sleep(1 * time.Second)
+	file, err := os.Open(input)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
 
-	// return nil, fmt.Errorf("oww my bones")
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile("file", filepath.Base(input))
+	if err != nil {
+		return nil, err
+	}
+	_, err = io.Copy(part, file)
 
-	// TODO: Read input file.
-	// TODO: call API and write out file.
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", ctx.MigrateAPIEndpoint, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Accept", "text/yaml")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	resBody := &bytes.Buffer{}
+	_, err = resBody.ReadFrom(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	resp.Body.Close()
+	fmt.Println(resBody)
+
+	err = os.WriteFile(output, resBody.Bytes(), 0644)
+	if err != nil {
+		return nil, err
+	}
 
 	return os.Open(output)
 }
 
 func (ctx *PipelineMigrateCommandContext) providerPrompt() survey.Prompt {
+	var options []string
+	for k := range providers {
+		options = append(options, k)
+	}
+
 	return &survey.Select{
 		Message: "Which CI provider are you migrating from?",
-		Options: []string{
-			CircleCI,
-			GitHubActions,
-		},
+		Options: options,
 	}
 }
 
 func (ctx *PipelineMigrateCommandContext) inputPrompt(provider string) survey.Prompt {
-	var defaultValue string
-	switch provider {
-	case CircleCI:
-		defaultValue = ".circleci/config.yml"
-	case GitHubActions:
-		defaultValue = ".github/workflows/main.yml"
+	defaultValue, ok := providers[provider]
+	if !ok {
+		defaultValue = ""
 	}
 
 	return &survey.Input{
