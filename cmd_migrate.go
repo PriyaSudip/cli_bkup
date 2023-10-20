@@ -16,8 +16,8 @@ import (
 )
 
 var providers map[string]string = map[string]string{
-	"CircleCI":       "circleci.yml",
-	"GitHub Actions": "github.yml",
+	"CircleCI":       "ci-examples/circleci.yml",
+	"GitHub Actions": "ci-examples/github.yml",
 }
 
 type PipelineMigrateCommandContext struct {
