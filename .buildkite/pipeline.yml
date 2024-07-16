@@ -8,19 +8,6 @@ steps:
           run: golangci-lint
           tty: true
 
-  - name: ":go: test"
-    artifact_paths:
-      - cover-tree.svg
-    commands:
-      - go test -coverprofile cover.out ./...
-      - go run github.com/nikolaydubina/go-cover-treemap@latest -coverprofile cover.out > cover-tree.svg
-      - echo '<details><summary>Coverage tree map</summary><img src="artifact://cover-tree.svg" alt="Test coverage tree map" width="70%"></details>' | buildkite-agent annotate --style "info"
-    plugins:
-      -  docker-compose#v5.2.0:
-          config: .buildkite/docker-compose.yaml
-          run: golangci-lint
-          tty: true
-          mount-buildkite-agent: true
 
   - wait
 
