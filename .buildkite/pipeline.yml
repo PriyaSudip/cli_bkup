@@ -1,5 +1,3 @@
-agents:
-  queue: hosted
 
 steps:
   - name: ":golangci-lint: lint"
